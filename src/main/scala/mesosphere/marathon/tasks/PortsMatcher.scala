@@ -1,16 +1,15 @@
 package mesosphere.marathon
 package tasks
 
-import mesosphere.marathon.core.pod.{BridgeNetwork, PodDefinition}
-import mesosphere.marathon.raml.Networks
-import mesosphere.marathon.state.{AppDefinition, Container, ResourceRole, RunSpec}
+import mesosphere.marathon.core.pod.PodDefinition
+import mesosphere.marathon.state.{ AppDefinition, Container, ResourceRole, RunSpec }
 import mesosphere.marathon.stream.Implicits._
 import mesosphere.marathon.tasks.PortsMatcher.PortWithRole
 import mesosphere.mesos.ResourceMatcher.ResourceSelector
 import mesosphere.mesos.protos
-import mesosphere.mesos.protos.{RangesResource, Resource}
+import mesosphere.mesos.protos.{ RangesResource, Resource }
 import mesosphere.util.Logging
-import org.apache.mesos.{Protos => MesosProtos}
+import org.apache.mesos.{ Protos => MesosProtos }
 
 import scala.annotation.tailrec
 import scala.util.Random
@@ -48,14 +47,7 @@ class PortsMatcher private[tasks] (
         val requiredPorts = for {
           container <- podDefinition.containers
           endpoint <- container.endpoints
-        } yield endpoint.hostPort match {
-            // if no host port is assigned, but the endpoint do not have a name or is configured to default mesos bridge name and
-            // the pod has a configured bridge network, then assign a random port
-          case None if (endpoint.networkNames.isEmpty || endpoint.networkNames.contains(Networks.DefaultMesosBridgeName))
-              && podDefinition.networks.exists(_.isInstanceOf[BridgeNetwork]) =>
-            Some(0)
-          case port => port
-        }
+        } yield endpoint.hostPort
 
         mappedPortRanges(requiredPorts)
       case app: AppDefinition =>
